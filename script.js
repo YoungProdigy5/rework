@@ -1,54 +1,1227 @@
-const visuals = [
- {id:1,title:"The quiet between stars",category:"Space",creator:"Luna Hart",initial:"L",likes:2480,height:290,img:"https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=800&q=85",desc:"A quiet reminder that there is always more beyond what we can see."},
- {id:2,title:"Lines of modern living",category:"Architecture",creator:"Studio Elle",initial:"E",likes:1840,height:220,img:"https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=800&q=85",desc:"Minimal forms, natural textures and spaces made to breathe."},
- {id:3,title:"A road into the unknown",category:"Nature",creator:"Kai Rivers",initial:"K",likes:3920,height:330,img:"https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=800&q=85",desc:"Find the kind of quiet that makes you feel alive."},
- {id:4,title:"Crimson after dark",category:"Aesthetic",creator:"Mira",initial:"M",likes:990,height:245,img:"https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=800&q=85",desc:"A cinematic mood for the hours after sunset."},
- {id:5,title:"Motion in perfect form",category:"Cars",creator:"Kairo",initial:"K",likes:5120,height:285,img:"https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=85",desc:"Sculpted lines, purposeful movement and timeless design."},
- {id:6,title:"Into the green",category:"Nature",creator:"Nia Woods",initial:"N",likes:2200,height:350,img:"https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=85",desc:"A little escape into the natural world."},
- {id:7,title:"Geometry of calm",category:"Architecture",creator:"Studio Elle",initial:"E",likes:1730,height:205,img:"https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=85",desc:"A study in balance, light and clean geometry."},
- {id:8,title:"The last light",category:"Aesthetic",creator:"Luna Hart",initial:"L",likes:3210,height:300,img:"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=85",desc:"Golden hour never asks for attention. It simply earns it."},
- {id:9,title:"Electric solitude",category:"Gaming",creator:"Nova",initial:"N",likes:860,height:240,img:"https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=85",desc:"A neon-lit corner of another universe."},
- {id:10,title:"Blue hour escape",category:"Nature",creator:"Kai Rivers",initial:"K",likes:2780,height:315,img:"https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=85",desc:"The world slows down when the sky turns blue."},
- {id:11,title:"A different perspective",category:"Architecture",creator:"Mira",initial:"M",likes:1430,height:225,img:"https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=800&q=85",desc:"Architecture that turns a simple walk into a moment."},
- {id:12,title:"Open roads, open mind",category:"Cars",creator:"Kairo",initial:"K",likes:4110,height:290,img:"https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=85",desc:"Some journeys are about the feeling, not the destination."}
-];
-const conversations=[
- {id:1,name:"Alex Morgan",initial:"A",time:"2m",preview:"That collection is incredible!",messages:[["Hey! I found your profile through the architecture collection.",false],["Thanks for stopping by. Glad you liked it!",true],["That collection is incredible! Where did you find the inspiration?",false]]},
- {id:2,name:"Mia Chen",initial:"M",time:"1h",preview:"Sent you a moodboard ✨",messages:[["I made a little moodboard you might enjoy.",false],["This is beautiful. The colours are perfect.",true],["Sent you a moodboard ✨",false]]},
- {id:3,name:"Kairo",initial:"K",time:"1d",preview:"See you around PIXORA.",messages:[["Are you into automotive design too?",false],["Definitely. Especially clean, minimal builds.",true],["See you around PIXORA.",false]]}
-];
-let savedIds=JSON.parse(localStorage.getItem("pixoraSaved")||"[]");
-let activeConversation=null, visibleCount=8, activeCategory="All";
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-function toast(message){const el=$("#toast");el.textContent=message;el.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove("show"),2300)}
-function cardTemplate(item){const saved=savedIds.includes(item.id);return `<article class="pin-card" data-id="${item.id}"><div class="pin-image-wrap"><img loading="lazy" src="${item.img}" alt="${item.title}" style="height:${item.height}px"><div class="pin-overlay"></div><button class="save-button ${saved?"saved":""}" data-save="${item.id}">${saved?"✓ Saved":"＋ Save"}</button></div><div class="pin-caption"><b>${item.title}</b><div class="pin-meta"><span class="pin-creator"><i class="mini-avatar">${item.initial}</i>${item.creator}</span><span class="pin-likes">♡ ${formatLikes(item.likes)}</span></div></div></article>`}
-function formatLikes(n){return n>=1000?(n/1000).toFixed(1).replace(".0","")+"k":n}
-function renderGrid(target,items){const el=$(target);if(el)el.innerHTML=items.map(cardTemplate).join("")}
-function renderHome(){renderGrid("#homeGrid",visuals.filter(v=>activeCategory==="All"||v.category===activeCategory).slice(0,visibleCount))}
-function renderDiscover(){let items=visuals.filter(v=>activeCategory==="All"||v.category===activeCategory);const sort=$("#sortSelect")?.value;if(sort==="Most liked")items.sort((a,b)=>b.likes-a.likes);renderGrid("#discoverGrid",items)}
-function renderSaved(){renderGrid("#savedGrid",visuals.filter(v=>savedIds.includes(v.id)));$("#savedCount").textContent=savedIds.length}
-function renderConversations(filter=""){const list=$("#conversationList");list.innerHTML=conversations.filter(c=>c.name.toLowerCase().includes(filter.toLowerCase())).map(c=>`<div class="conversation ${activeConversation===c.id?"active":""}" data-conversation="${c.id}"><span class="conversation-avatar">${c.initial}</span><div class="conversation-copy"><b>${c.name}</b><p>${c.preview}</p></div><span class="conversation-time">${c.time}</span></div>`).join("")}
-function openChat(id){activeConversation=id;const c=conversations.find(x=>x.id===id);renderConversations($("#conversationSearch").value);$("#chatPanel").innerHTML=`<div class="chat-top"><span class="conversation-avatar">${c.initial}</span><div><b>${c.name}</b><small>Demo conversation · Offline prototype</small></div><i class="online-indicator"></i></div><div class="chat-body" id="chatBody"><div class="chat-date">TODAY</div>${c.messages.map(m=>messageHTML(m[0],m[1])).join("")}</div><form class="chat-compose" id="chatForm"><input id="chatInput" placeholder="Write a message..." maxlength="500" autocomplete="off"><button type="submit">Send ↗</button></form>`;$("#chatForm").addEventListener("submit",sendMessage)}
-function messageHTML(text,mine){return `<div class="message ${mine?"mine":""}">${escapeHTML(text)}<small>${mine?"You":"PIXORA demo"} · now</small></div>`}
-function sendMessage(e){e.preventDefault();const input=$("#chatInput"),value=input.value.trim();if(!value)return;const c=conversations.find(x=>x.id===activeConversation);c.messages.push([value,true]);c.preview=value;openChat(activeConversation);$("#chatBody").scrollTop=$("#chatBody").scrollHeight}
-function escapeHTML(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function navigate(page){$$(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+page));$$("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));$("#sidebar").classList.remove("open");window.scrollTo({top:0,behavior:"smooth"});if(page==="profile")renderSaved();if(page==="messages"&&!activeConversation)renderConversations();if(page==="discover")renderDiscover()}
-function openPreview(id){const item=visuals.find(v=>v.id===Number(id));if(!item)return;$("#previewContent").innerHTML=`<div class="preview-layout"><img src="${item.img}" alt="${item.title}"><div class="preview-copy"><span class="eyebrow">${item.category.toUpperCase()} · PIXORA DISCOVERY</span><h2>${item.title}</h2><p>${item.desc}</p><p>Shared by <b>${item.creator}</b> · ♡ ${formatLikes(item.likes)} likes</p><button class="primary-button" data-save="${item.id}">${savedIds.includes(item.id)?"✓ Saved to collection":"＋ Save to collection"}</button></div></div>`;$("#previewModal").classList.add("open")}
-function toggleSave(id){id=Number(id);savedIds=savedIds.includes(id)?savedIds.filter(x=>x!==id):[...savedIds,id];localStorage.setItem("pixoraSaved",JSON.stringify(savedIds));renderHome();renderDiscover();renderSaved();toast(savedIds.includes(id)?"Saved to your collection":"Removed from saved items");}
-function setCategory(category){activeCategory=category;$$("[data-category]").forEach(b=>b.classList.toggle("selected",b.dataset.category===category));$$("[data-filter]").forEach(b=>b.classList.toggle("active",b.dataset.filter===category));renderHome();renderDiscover()}
-document.addEventListener("click",e=>{const page=e.target.closest("[data-page]");if(page){navigate(page.dataset.page);return}const save=e.target.closest("[data-save]");if(save){e.stopPropagation();toggleSave(save.dataset.save);if($("#previewModal").classList.contains("open"))openPreview(save.dataset.save);return}const card=e.target.closest(".pin-card");if(card){openPreview(card.dataset.id);return}const cat=e.target.closest("[data-category],[data-filter]");if(cat){setCategory(cat.dataset.category||cat.dataset.filter);return}const convo=e.target.closest("[data-conversation]");if(convo){openChat(Number(convo.dataset.conversation));return}const close=e.target.closest("[data-close]");if(close)$("#"+close.dataset.close).classList.remove("open")});
-$("#loadMore").addEventListener("click",()=>{visibleCount=Math.min(visuals.length,visibleCount+4);renderHome();if(visibleCount>=visuals.length)$("#loadMore").textContent="You've seen it all ✦"});
-$("#sortSelect").addEventListener("change",renderDiscover);
-$("#conversationSearch").addEventListener("input",e=>renderConversations(e.target.value));
-$("#newMessage").addEventListener("click",()=>toast("New conversations will be enabled after backend integration."));
-$("#startChat").addEventListener("click",()=>{openChat(1)});
-$("#editProfile").addEventListener("click",()=>toast("Profile editing will be connected in the backend phase."));
-$("#newCollection").addEventListener("click",()=>toast("Collection creation is planned for backend integration."));
-$("#atmosphereBtn").addEventListener("click",()=>$("#atmosphereModal").classList.add("open"));
-$$("[data-atmo]").forEach(b=>b.addEventListener("click",()=>{$$("[data-atmo]").forEach(x=>x.classList.remove("selected"));b.classList.add("selected")}));
-$("#applyAtmosphere").addEventListener("click",()=>{const mode=$(".atmo-option.selected").dataset.atmo;document.body.dataset.atmosphere=mode==="default"?"":mode;localStorage.setItem("pixoraAtmosphere",mode);$("#atmosphereModal").classList.remove("open");toast("Your PIXORA atmosphere has been updated.")});
-$("#menuToggle").addEventListener("click",()=>$("#sidebar").classList.toggle("open"));
-$("#globalSearch").addEventListener("keydown",e=>{if(e.key==="Enter"){navigate("discover");activeCategory="All";const q=e.target.value.toLowerCase();const results=visuals.filter(v=>(v.title+" "+v.category+" "+v.creator).toLowerCase().includes(q));renderGrid("#discoverGrid",results);}});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")$$(".modal-backdrop.open").forEach(m=>m.classList.remove("open"));if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("#globalSearch").focus()}});
-const savedAtmosphere=localStorage.getItem("pixoraAtmosphere");if(savedAtmosphere&&savedAtmosphere!=="default")document.body.dataset.atmosphere=savedAtmosphere;
-renderHome();renderDiscover();renderSaved();renderConversations();
+
+/* =========================================================
+   PIXORA — LIVE FRONTEND
+   Current project: YoungProdigy5/rework
+   Uses backend.js and the CURRENT PIXORA Supabase project.
+========================================================= */
+
+(() => {
+  "use strict";
+
+  const $ = (selector) => document.querySelector(selector);
+  const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+  const API = window.PIXORA;
+
+  let posts = [];
+  let savedIds = [];
+  let currentUser = null;
+  let currentProfile = null;
+  let activeCategory = "All";
+  let visibleCount = 24;
+  let loading = false;
+
+  const escapeHTML = (value = "") =>
+    String(value).replace(/[&<>"']/g, char => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[char]);
+
+  function toast(message) {
+    const element = $("#toast");
+    if (!element) return;
+
+    element.textContent = message;
+    element.classList.add("show");
+
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(
+      () => element.classList.remove("show"),
+      3000
+    );
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+
+    return new Date(value).toLocaleDateString(
+      undefined,
+      { day: "numeric", month: "short" }
+    );
+  }
+
+  function requireBackend() {
+    if (!API) {
+      toast("PIXORA backend could not load. Refresh the page.");
+      return false;
+    }
+
+    return true;
+  }
+
+  /* =====================================================
+     REMOVE DEMO CONTENT
+  ===================================================== */
+
+  function cleanDemoInterface() {
+    const demoAdmin = $("#page-admin");
+
+    if (demoAdmin) {
+      demoAdmin.innerHTML = `
+        <div class="page-heading">
+          <div class="eyebrow">PIXORA CONTROL ROOM</div>
+          <h1>Admin <span>access.</span></h1>
+          <p class="subheading">
+            Administration is restricted to authorized accounts.
+          </p>
+        </div>
+        <div class="admin-warning">
+          Admin tools are not publicly available.
+        </div>
+      `;
+    }
+
+    const notifications = $(
+      "#page-notifications .notification-list"
+    );
+
+    if (notifications) {
+      notifications.innerHTML = `
+        <div class="empty-state">
+          <h3>Your activity will appear here.</h3>
+          <p>You don't have any notifications to display yet.</p>
+        </div>
+      `;
+    }
+
+    const collections = $("#page-collections .collection-grid");
+
+    if (collections) {
+      collections.innerHTML = `
+        <div class="empty-state">
+          <h3>Your collections will live here.</h3>
+          <p>Collection management is being connected to your account.</p>
+        </div>
+      `;
+    }
+
+    const chatPanel = $("#chatPanel");
+
+    if (chatPanel) {
+      chatPanel.innerHTML = `
+        <div class="chat-empty">
+          <span class="empty-icon">✉</span>
+          <h3>Your conversations live here.</h3>
+          <p>Real messaging is being connected.</p>
+        </div>
+      `;
+    }
+
+    const conversationList = $("#conversationList");
+
+    if (conversationList) {
+      conversationList.innerHTML = `
+        <div class="empty-state">
+          <p>No conversations to display yet.</p>
+        </div>
+      `;
+    }
+
+    const adminLink = $('footer [data-page="admin"]');
+
+    if (adminLink) {
+      adminLink.remove();
+    }
+
+    const messageCount = $(".nav-count");
+
+    if (messageCount) messageCount.remove();
+
+    const notificationDot = $(".notification-dot");
+
+    if (notificationDot) notificationDot.remove();
+
+    const fakeStats = $$(".profile-stats span");
+
+    if (fakeStats.length >= 2) {
+      fakeStats[0].innerHTML =
+        '<b id="followingCount">—</b> <small>Following</small>';
+
+      fakeStats[1].innerHTML =
+        '<b id="followersCount">—</b> <small>Followers</small>';
+    }
+  }
+
+  /* =====================================================
+     AUTHENTICATION INTERFACE
+  ===================================================== */
+
+  function createAuthInterface() {
+    if ($("#authModal")) return;
+
+    const modal = document.createElement("div");
+
+    modal.id = "authModal";
+    modal.className = "modal-backdrop";
+
+    modal.innerHTML = `
+      <div class="small-modal">
+        <button class="modal-close" data-close="authModal">×</button>
+
+        <div class="eyebrow">YOUR PIXORA ACCOUNT</div>
+
+        <h2 id="authTitle">Welcome <span>back.</span></h2>
+
+        <p id="authDescription">
+          Sign in to continue exploring PIXORA.
+        </p>
+
+        <form id="authForm">
+
+          <div id="usernameField" hidden>
+            <label>Username</label>
+            <input
+              name="username"
+              type="text"
+              minlength="3"
+              maxlength="30"
+              autocomplete="username"
+            >
+          </div>
+
+          <div id="displayNameField" hidden>
+            <label>Display name</label>
+            <input
+              name="displayName"
+              type="text"
+              maxlength="80"
+            >
+          </div>
+
+          <label>Email address</label>
+          <input
+            name="email"
+            type="email"
+            required
+            autocomplete="email"
+          >
+
+          <label>Password</label>
+          <input
+            name="password"
+            type="password"
+            minlength="8"
+            required
+            autocomplete="current-password"
+          >
+
+          <button
+            type="submit"
+            class="primary-button full-button"
+            id="authSubmit"
+          >
+            Sign in
+          </button>
+
+        </form>
+
+        <p>
+          <button class="text-button" id="authSwitch">
+            Don't have an account? Create one.
+          </button>
+        </p>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    $("#authForm").addEventListener(
+      "submit",
+      submitAuth
+    );
+
+    $("#authSwitch").addEventListener(
+      "click",
+      () => setAuthMode(
+        authMode === "login" ? "signup" : "login"
+      )
+    );
+  }
+
+  let authMode = "login";
+
+  function setAuthMode(mode) {
+    authMode = mode;
+
+    const signup = mode === "signup";
+
+    $("#authTitle").innerHTML = signup
+      ? 'Join <span>PIXORA.</span>'
+      : 'Welcome <span>back.</span>';
+
+    $("#authDescription").textContent = signup
+      ? "Create your account and start sharing."
+      : "Sign in to continue exploring PIXORA.";
+
+    $("#authSubmit").textContent = signup
+      ? "Create account"
+      : "Sign in";
+
+    $("#usernameField").hidden = !signup;
+    $("#displayNameField").hidden = !signup;
+
+    $("#authSwitch").textContent = signup
+      ? "Already have an account? Sign in."
+      : "Don't have an account? Create one.";
+
+    const password = $('#authForm [name="password"]');
+
+    password.autocomplete = signup
+      ? "new-password"
+      : "current-password";
+  }
+
+  function openAuth() {
+    if (!requireBackend()) return;
+
+    setAuthMode("login");
+    $("#authModal").classList.add("open");
+  }
+
+  async function submitAuth(event) {
+    event.preventDefault();
+
+    if (!requireBackend()) return;
+
+    const form = new FormData(event.currentTarget);
+
+    const email = form.get("email");
+    const password = form.get("password");
+
+    const button = $("#authSubmit");
+
+    button.disabled = true;
+    button.textContent = "Please wait...";
+
+    try {
+      if (authMode === "signup") {
+        const result = await API.auth.signUp({
+          email,
+          password,
+          username: form.get("username"),
+          displayName: form.get("displayName")
+        });
+
+        if (!result.session) {
+          toast(
+            "Account created. Check your email if confirmation is required."
+          );
+        } else {
+          toast("Your PIXORA account has been created.");
+        }
+      } else {
+        await API.auth.signIn({
+          email,
+          password
+        });
+
+        toast("Welcome back to PIXORA.");
+      }
+
+      $("#authModal").classList.remove("open");
+
+      await refreshAccount();
+
+      event.currentTarget.reset();
+
+    } catch (error) {
+      toast(error.message || "Authentication failed.");
+    } finally {
+      button.disabled = false;
+
+      button.textContent =
+        authMode === "signup"
+          ? "Create account"
+          : "Sign in";
+    }
+  }
+
+  async function refreshAccount() {
+    if (!API) return;
+
+    const session = await API.auth.getSession();
+
+    currentUser = session?.user || null;
+    currentProfile = null;
+
+    if (currentUser) {
+      currentProfile = await API.profiles.get(
+        currentUser.id
+      );
+    }
+
+    renderAccount();
+    renderProfile();
+  }
+
+  function renderAccount() {
+    const name = currentProfile?.display_name ||
+      currentProfile?.username ||
+      "PIXORA member";
+
+    const initial = name.charAt(0).toUpperCase();
+
+    const mini = $(".user-mini");
+
+    if (mini) {
+      mini.innerHTML = `
+        <span class="avatar avatar-you">
+          ${escapeHTML(initial)}
+        </span>
+
+        <span>
+          <b>${escapeHTML(name)}</b>
+          <small>
+            ${currentUser ? "Signed in" : "Guest account"}
+          </small>
+        </span>
+
+        <span class="more">···</span>
+      `;
+    }
+
+    const avatar = $(".top-avatar");
+
+    if (avatar) avatar.textContent = initial;
+
+    const profileName = $("#page-profile h1");
+
+    if (profileName) {
+      profileName.textContent = currentUser
+        ? name
+        : "Guest";
+    }
+
+    const handle = $(".profile-handle");
+
+    if (handle) {
+      handle.textContent = currentProfile
+        ? "@" + currentProfile.username
+        : "Sign in to access your profile";
+    }
+
+    const bio = $(".profile-bio");
+
+    if (bio) {
+      bio.textContent = currentProfile?.bio || "";
+    }
+
+    updateAuthButton();
+  }
+
+  function updateAuthButton() {
+    let button = $("#accountAction");
+
+    if (!button) {
+      button = document.createElement("button");
+
+      button.id = "accountAction";
+      button.className = "outline-button";
+
+      const actions = $(".top-actions");
+
+      if (actions) actions.prepend(button);
+    }
+
+    if (!button) return;
+
+    button.textContent = currentUser
+      ? "Sign out"
+      : "Sign in";
+
+    button.onclick = async () => {
+      if (!currentUser) {
+        openAuth();
+        return;
+      }
+
+      try {
+        await API.auth.signOut();
+
+        currentUser = null;
+        currentProfile = null;
+        savedIds = [];
+
+        await refreshAccount();
+        await loadFeed();
+
+        toast("You have signed out.");
+
+      } catch (error) {
+        toast(error.message);
+      }
+    };
+  }
+
+  async function renderProfile() {
+    const stats = $(".profile-stats");
+
+    if (!stats) return;
+
+    if (!currentUser) {
+      stats.innerHTML = `
+        <span><b>—</b> <small>Following</small></span>
+        <span><b>—</b> <small>Followers</small></span>
+        <span><b>0</b> <small>Saved</small></span>
+      `;
+
+      return;
+    }
+
+    try {
+      const client = API.supabase;
+
+      const [following, followers] = await Promise.all([
+        client.from("follows")
+          .select("following_id", { count: "exact", head: true })
+          .eq("follower_id", currentUser.id),
+
+        client.from("follows")
+          .select("follower_id", { count: "exact", head: true })
+          .eq("following_id", currentUser.id)
+      ]);
+
+      stats.innerHTML = `
+        <span>
+          <b>${following.count ?? 0}</b>
+          <small>Following</small>
+        </span>
+
+        <span>
+          <b>${followers.count ?? 0}</b>
+          <small>Followers</small>
+        </span>
+
+        <span>
+          <b>${savedIds.length}</b>
+          <small>Saved</small>
+        </span>
+      `;
+
+    } catch (error) {
+      console.error("Profile statistics:", error);
+    }
+  }
+
+  /* =====================================================
+     PUBLISHING INTERFACE
+  ===================================================== */
+
+  function createPublishInterface() {
+    if ($("#publishModal")) return;
+
+    const modal = document.createElement("div");
+
+    modal.id = "publishModal";
+    modal.className = "modal-backdrop";
+
+    modal.innerHTML = `
+      <div class="small-modal">
+
+        <button class="modal-close" data-close="publishModal">
+          ×
+        </button>
+
+        <div class="eyebrow">CREATE SOMETHING</div>
+
+        <h2>Share with <span>PIXORA.</span></h2>
+
+        <p>Publish images, videos or a carousel.</p>
+
+        <form id="publishForm">
+
+          <label>Select media</label>
+
+          <input
+            type="file"
+            name="files"
+            accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"
+            multiple
+            required
+          >
+
+          <small>
+            Maximum 10 files. Each file must be 50 MB or less.
+          </small>
+
+          <label>Caption</label>
+
+          <textarea
+            name="caption"
+            maxlength="5000"
+            rows="4"
+            placeholder="Tell the world about your post..."
+          ></textarea>
+
+          <label>Category</label>
+
+          <select name="category">
+            <option value="">Choose a category</option>
+          </select>
+
+          <button
+            class="primary-button full-button"
+            type="submit"
+            id="publishSubmit"
+          >
+            Publish post
+          </button>
+
+        </form>
+
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    $("#publishForm").addEventListener(
+      "submit",
+      submitPost
+    );
+
+    loadPublishCategories();
+  }
+
+  async function loadPublishCategories() {
+    if (!API) return;
+
+    try {
+      const categories = await API.categories.list();
+
+      const select = $('#publishForm [name="category"]');
+
+      select.innerHTML =
+        '<option value="">Choose a category</option>' +
+        categories.map(category => `
+          <option value="${escapeHTML(category.id)}">
+            ${escapeHTML(category.name)}
+          </option>
+        `).join("");
+
+    } catch (error) {
+      console.error("Categories:", error);
+    }
+  }
+
+  async function submitPost(event) {
+    event.preventDefault();
+
+    if (!currentUser) {
+      toast("Sign in before publishing.");
+      openAuth();
+      return;
+    }
+
+    const form = new FormData(event.currentTarget);
+
+    const files = form.getAll("files").filter(
+      file => file instanceof File && file.size > 0
+    );
+
+    const button = $("#publishSubmit");
+
+    button.disabled = true;
+    button.textContent = "Uploading and publishing...";
+
+    try {
+      const category = form.get("category");
+
+      await API.posts.publish({
+        files,
+        caption: form.get("caption"),
+        categoryId: category || null,
+        visibility: "public",
+        allowComments: true
+      });
+
+      $("#publishModal").classList.remove("open");
+
+      event.currentTarget.reset();
+
+      toast("Your post has been published.");
+
+      await loadFeed();
+
+      navigate("home");
+
+    } catch (error) {
+      toast(error.message || "Could not publish your post.");
+    } finally {
+      button.disabled = false;
+      button.textContent = "Publish post";
+    }
+  }
+
+  function createPublishButton() {
+    const actions = $(".top-actions");
+
+    if (!actions || $("#openPublish")) return;
+
+    const button = document.createElement("button");
+
+    button.id = "openPublish";
+    button.className = "primary-button";
+    button.textContent = "+ Create";
+
+    button.addEventListener("click", () => {
+      if (!currentUser) {
+        toast("Sign in before creating a post.");
+        openAuth();
+        return;
+      }
+
+      $("#publishModal").classList.add("open");
+    });
+
+    actions.prepend(button);
+  }
+
+  /* =====================================================
+     REAL DATABASE FEED
+  ===================================================== */
+
+  function postCard(post) {
+    const creator = post.profiles || {};
+
+    const creatorName =
+      creator.display_name ||
+      creator.username ||
+      "PIXORA creator";
+
+    const media = post.media?.[0];
+
+    if (!media) return "";
+
+    const isVideo = media.media_type === "video";
+
+    const saved = savedIds.includes(post.id);
+
+    const mediaHTML = isVideo
+      ? `
+        <video
+          src="${escapeHTML(media.publicUrl)}"
+          controls
+          preload="metadata"
+          playsinline
+        ></video>
+      `
+      : `
+        <img
+          loading="lazy"
+          src="${escapeHTML(media.publicUrl)}"
+          alt="${escapeHTML(media.alt_text || post.caption || "PIXORA post")}"
+        >
+      `;
+
+    const category = post.categories?.[0]?.name || "PIXORA";
+
+    return `
+      <article class="pin-card" data-id="${escapeHTML(post.id)}">
+
+        <div class="pin-image-wrap">
+          ${mediaHTML}
+
+          <div class="pin-overlay"></div>
+
+          <button
+            class="save-button ${saved ? "saved" : ""}"
+            data-save="${escapeHTML(post.id)}"
+          >
+            ${saved ? "✓ Saved" : "＋ Save"}
+          </button>
+        </div>
+
+        <div class="pin-caption">
+
+          <b>${escapeHTML(post.caption || "Untitled post")}</b>
+
+          <div class="pin-meta">
+
+            <span class="pin-creator">
+              <i class="mini-avatar">
+                ${escapeHTML(creatorName.charAt(0).toUpperCase())}
+              </i>
+
+              ${escapeHTML(creatorName)}
+            </span>
+
+            <span class="pin-likes">
+              ${escapeHTML(category)}
+            </span>
+
+          </div>
+
+          <small>${formatDate(post.published_at)}</small>
+
+        </div>
+
+      </article>
+    `;
+  }
+
+  function renderFeed(target, items) {
+    const element = $(target);
+
+    if (!element) return;
+
+    if (!items.length) {
+      element.innerHTML = `
+        <div class="empty-state">
+          <h3>Nothing here yet.</h3>
+          <p>Be among the first to publish something on PIXORA.</p>
+        </div>
+      `;
+
+      return;
+    }
+
+    element.innerHTML = items.map(postCard).join("");
+  }
+
+  async function loadFeed() {
+    if (!requireBackend() || loading) return;
+
+    loading = true;
+
+    const home = $("#homeGrid");
+    const discover = $("#discoverGrid");
+
+    if (home) home.innerHTML = "<p>Loading PIXORA posts...</p>";
+    if (discover) discover.innerHTML = "<p>Loading...</p>";
+
+    try {
+      posts = await API.posts.feed({
+        limit: visibleCount
+      });
+
+      await loadSavedIds();
+
+      renderHome();
+      renderDiscover();
+      renderSaved();
+      renderProfile();
+
+    } catch (error) {
+      console.error("Feed error:", error);
+
+      const message = `
+        <div class="empty-state">
+          <h3>We couldn't load the feed.</h3>
+          <p>${escapeHTML(error.message)}</p>
+          <button class="outline-button" onclick="location.reload()">
+            Try again
+          </button>
+        </div>
+      `;
+
+      if (home) home.innerHTML = message;
+      if (discover) discover.innerHTML = message;
+
+    } finally {
+      loading = false;
+    }
+  }
+
+  function renderHome() {
+    const items = posts.filter(post =>
+      activeCategory === "All" ||
+      post.categories?.some(
+        category => category.name === activeCategory
+      )
+    );
+
+    renderFeed("#homeGrid", items);
+  }
+
+  function renderDiscover() {
+    let items = posts.filter(post =>
+      activeCategory === "All" ||
+      post.categories?.some(
+        category => category.name === activeCategory
+      )
+    );
+
+    const sort = $("#sortSelect")?.value;
+
+    if (sort === "Newest") {
+      items.sort((a, b) =>
+        new Date(b.published_at) - new Date(a.published_at)
+      );
+    }
+
+    renderFeed("#discoverGrid", items);
+  }
+
+  /* =====================================================
+     REAL SAVES
+  ===================================================== */
+
+  async function loadSavedIds() {
+    if (!currentUser) {
+      savedIds = [];
+      return;
+    }
+
+    const { data, error } = await API.supabase
+      .from("saves")
+      .select("post_id")
+      .eq("user_id", currentUser.id);
+
+    if (error) throw error;
+
+    savedIds = (data || []).map(row => row.post_id);
+  }
+
+  async function toggleSave(postId) {
+    if (!currentUser) {
+      toast("Sign in to save posts.");
+      openAuth();
+      return;
+    }
+
+    try {
+      const saved = await API.saves.toggle(postId);
+
+      await loadSavedIds();
+
+      renderHome();
+      renderDiscover();
+      renderSaved();
+      renderProfile();
+
+      toast(saved ? "Post saved." : "Post removed from saved items.");
+
+    } catch (error) {
+      toast(error.message);
+    }
+  }
+
+  function renderSaved() {
+    const savedPosts = posts.filter(
+      post => savedIds.includes(post.id)
+    );
+
+    renderFeed("#savedGrid", savedPosts);
+
+    const count = $("#savedCount");
+
+    if (count) count.textContent = savedIds.length;
+  }
+
+  /* =====================================================
+     SEARCH AND NAVIGATION
+  ===================================================== */
+
+  function setCategory(category) {
+    activeCategory = category;
+
+    $$("[data-category]").forEach(button => {
+      button.classList.toggle(
+        "selected",
+        button.dataset.category === category
+      );
+    });
+
+    $$("[data-filter]").forEach(button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.filter === category
+      );
+    });
+
+    renderHome();
+    renderDiscover();
+  }
+
+  function navigate(page) {
+    $$(".page").forEach(section => {
+      section.classList.toggle(
+        "active",
+        section.id === "page-" + page
+      );
+    });
+
+    $$("[data-page]").forEach(button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.page === page
+      );
+    });
+
+    $("#sidebar")?.classList.remove("open");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+    if (page === "profile") renderSaved();
+    if (page === "discover") renderDiscover();
+  }
+
+  function searchPosts(query) {
+    const q = query.trim().toLowerCase();
+
+    if (!q) {
+      renderDiscover();
+      return;
+    }
+
+    const results = posts.filter(post => {
+      const creator = post.profiles || {};
+
+      const categories = (post.categories || [])
+        .map(category => category.name)
+        .join(" ");
+
+      return [
+        post.caption,
+        creator.username,
+        creator.display_name,
+        categories
+      ].join(" ").toLowerCase().includes(q);
+    });
+
+    renderFeed("#discoverGrid", results);
+  }
+
+  /* =====================================================
+     POST PREVIEW
+  ===================================================== */
+
+  function openPreview(id) {
+    const post = posts.find(item => item.id === id);
+
+    if (!post) return;
+
+    const media = post.media?.[0];
+
+    if (!media) return;
+
+    const creator = post.profiles || {};
+
+    const creatorName =
+      creator.display_name ||
+      creator.username ||
+      "PIXORA creator";
+
+    const mediaHTML = media.media_type === "video"
+      ? `<video src="${escapeHTML(media.publicUrl)}" controls playsinline></video>`
+      : `<img src="${escapeHTML(media.publicUrl)}" alt="${escapeHTML(post.caption || "PIXORA post")}">`;
+
+    $("#previewContent").innerHTML = `
+      <div class="preview-layout">
+
+        ${mediaHTML}
+
+        <div class="preview-copy">
+
+          <span class="eyebrow">
+            PIXORA DISCOVERY
+          </span>
+
+          <h2>${escapeHTML(post.caption || "PIXORA post")}</h2>
+
+          <p>
+            Shared by <b>${escapeHTML(creatorName)}</b>
+          </p>
+
+          <button
+            class="primary-button"
+            data-save="${escapeHTML(post.id)}"
+          >
+            ${savedIds.includes(post.id) ? "✓ Saved" : "＋ Save"}
+          </button>
+
+        </div>
+
+      </div>
+    `;
+
+    $("#previewModal").classList.add("open");
+  }
+
+  /* =====================================================
+     EVENTS
+  ===================================================== */
+
+  document.addEventListener("click", event => {
+    const page = event.target.closest("[data-page]");
+
+    if (page) {
+      navigate(page.dataset.page);
+      return;
+    }
+
+    const save = event.target.closest("[data-save]");
+
+    if (save) {
+      event.stopPropagation();
+      toggleSave(save.dataset.save);
+      return;
+    }
+
+    const category = event.target.closest(
+      "[data-category], [data-filter]"
+    );
+
+    if (category) {
+      setCategory(
+        category.dataset.category ||
+        category.dataset.filter
+      );
+      return;
+    }
+
+    const card = event.target.closest(".pin-card");
+
+    if (card) {
+      openPreview(card.dataset.id);
+      return;
+    }
+
+    const close = event.target.closest("[data-close]");
+
+    if (close) {
+      $("#" + close.dataset.close)?.classList.remove("open");
+    }
+  });
+
+  $("#sortSelect")?.addEventListener(
+    "change",
+    renderDiscover
+  );
+
+  $("#globalSearch")?.addEventListener(
+    "keydown",
+    event => {
+      if (event.key === "Enter") {
+        navigate("discover");
+        searchPosts(event.target.value);
+      }
+    }
+  );
+
+  $("#loadMore")?.addEventListener("click", async () => {
+    visibleCount += 24;
+    await loadFeed();
+  });
+
+  $("#menuToggle")?.addEventListener("click", () => {
+    $("#sidebar")?.classList.toggle("open");
+  });
+
+  $("#atmosphereBtn")?.addEventListener("click", () => {
+    $("#atmosphereModal")?.classList.add("open");
+  });
+
+  $$("[data-atmo]").forEach(button => {
+    button.addEventListener("click", () => {
+      $$("[data-atmo]").forEach(item =>
+        item.classList.remove("selected")
+      );
+
+      button.classList.add("selected");
+    });
+  });
+
+  $("#applyAtmosphere")?.addEventListener("click", () => {
+    const selected = $(".atmo-option.selected");
+
+    if (!selected) return;
+
+    const mode = selected.dataset.atmo;
+
+    document.body.dataset.atmosphere =
+      mode === "default" ? "" : mode;
+
+    localStorage.setItem("pixoraAtmosphere", mode);
+
+    $("#atmosphereModal")?.classList.remove("open");
+
+    toast("Your PIXORA atmosphere has been updated.");
+  });
+
+  $("#editProfile")?.addEventListener("click", () => {
+    if (!currentUser) {
+      openAuth();
+      return;
+    }
+
+    toast("Profile editing is the next integration stage.");
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      $$(".modal-backdrop.open").forEach(modal =>
+        modal.classList.remove("open")
+      );
+    }
+
+    if (
+      (event.metaKey || event.ctrlKey) &&
+      event.key.toLowerCase() === "k"
+    ) {
+      event.preventDefault();
+      $("#globalSearch")?.focus();
+    }
+  });
+
+  /* =====================================================
+     INITIALIZE PIXORA
+  ===================================================== */
+
+  async function initialize() {
+    cleanDemoInterface();
+
+    createAuthInterface();
+    createPublishInterface();
+    createPublishButton();
+
+    const savedAtmosphere =
+      localStorage.getItem("pixoraAtmosphere");
+
+    if (savedAtmosphere && savedAtmosphere !== "default") {
+      document.body.dataset.atmosphere = savedAtmosphere;
+    }
+
+    if (!requireBackend()) return;
+
+    try {
+      await refreshAccount();
+      await loadFeed();
+
+      console.info("PIXORA live frontend initialized.");
+
+    } catch (error) {
+      console.error("PIXORA initialization:", error);
+      toast("PIXORA could not finish loading. Check your connection.");
+    }
+  }
+
+  initialize();
+
+  window.addEventListener("pixora:auth", async () => {
+    try {
+      await refreshAccount();
+      await loadFeed();
+    } catch (error) {
+      console.error("Authentication update:", error);
+    }
+  });
+
+})();
+
