@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b080a">
+  <title>PIXORA Admin Control Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{color-scheme:dark;--bg:#0b080a;--panel:#151014;--panel2:#1b1218;--line:#30202a;--text:#f8edf1;--muted:#a8949e;--accent:#e45a7d;--green:#83d5a0;--amber:#e9b47e;--red:#ff8191}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#351523 0,transparent 36%),var(--bg);color:var(--text);font:14px "DM Sans",sans-serif;min-height:100vh}
+    button,input,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}.shell{max-width:1440px;margin:auto;padding:22px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 0 22px;border-bottom:1px solid var(--line)}
+    .brand{display:flex;align-items:center;gap:11px;font:800 18px Manrope;letter-spacing:2px}.mark{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#f07897,#a51e47);color:white;font-size:22px}
+    .top-right{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:12px}.top-right button,.secondary{border:1px solid var(--line);background:#1b1218;color:#f4dfe7;border-radius:9px;padding:10px 13px}
+    .layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:22px;padding-top:22px}.side{background:#100b0f;border:1px solid var(--line);border-radius:15px;padding:12px;height:max-content;position:sticky;top:16px}
+    .side button{width:100%;text-align:left;border:0;background:transparent;color:var(--muted);padding:13px 12px;border-radius:9px;margin:2px 0}.side button.active,.side button:hover{background:#321824;color:white}.side small{display:block;padding:13px 12px 5px;color:#806d77;font-size:9px;letter-spacing:1.4px}
+    .heading{margin:4px 0 20px}.eyebrow{color:#e77b98;font-size:10px;letter-spacing:1.8px;font-weight:700}.heading h1{font:800 clamp(26px,4vw,38px) Manrope;margin:8px 0}.heading p{color:var(--muted);margin:0}
+    .notice{padding:12px 14px;border:1px solid #61402c;background:#281b15;color:#e9bd95;border-radius:10px;margin-bottom:18px;font-size:12px;line-height:1.5}
+    .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card,.panel{background:linear-gradient(145deg,#191117,#120d11);border:1px solid var(--line);border-radius:13px;padding:17px;min-width:0}.card small{color:var(--muted)}.card strong{display:block;font:800 28px Manrope;margin:11px 0 3px}.card span{font-size:11px;color:#8d7b85}
+    .grid-two{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;margin-top:15px}.panel h2{font:700 15px Manrope;margin:0 0 5px}.panel .sub{font-size:11px;color:var(--muted);margin:0 0 15px}
+    .health{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:12px}.health:last-child{border:0}.ok{color:var(--green)}.warn{color:var(--amber)}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}.toolbar input{background:#0e0a0d;border:1px solid var(--line);color:white;border-radius:8px;padding:10px 12px;min-width:220px}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}table{width:100%;border-collapse:collapse;min-width:700px;text-align:left}th,td{padding:12px 11px;border-bottom:1px solid var(--line);font-size:11px;vertical-align:top}th{color:#9c8792;font-size:9px;letter-spacing:1px;background:#170f14}td{color:#e5d6dd}tr:last-child td{border:0}.muted{color:var(--muted)}.pill{display:inline-block;border-radius:20px;padding:5px 8px;background:#30202a;color:#e7b5c5;font-size:9px}.pill.green{background:#163022;color:#9de2b4}.pill.orange{background:#392718;color:#edc08f}.action{border:1px solid #613044;background:#2a1520;color:#ffdce6;border-radius:7px;padding:7px 9px;font-size:10px;margin:2px}.action.danger{border-color:#71303c;background:#35151b;color:#ffb1ba}
+    .empty{padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:10px}.error{color:#ff9eaa;background:#32151c;border:1px solid #71303c;padding:12px;border-radius:9px;margin:12px 0}.success{color:#9de2b4;background:#14281d;border:1px solid #28543a;padding:12px;border-radius:9px;margin:12px 0}
+    .auth-wrap{max-width:440px;margin:8vh auto;padding:0 18px}.auth-card{background:#151014;border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:0 25px 90px #0008}.auth-card h1{font:800 25px Manrope;margin:18px 0 8px}.auth-card p{color:var(--muted);font-size:12px;line-height:1.6}.auth-card label{display:block;margin:15px 0 6px;color:#d8c4cd;font-size:11px}.auth-card input{width:100%;background:#0d090c;border:1px solid var(--line);border-radius:9px;padding:12px;color:white}.primary{width:100%;border:0;border-radius:9px;background:linear-gradient(110deg,#e45a7d,#b5274e);color:white;padding:13px;font-weight:700;margin-top:18px}
+    .foot{color:#786873;text-align:center;font-size:10px;padding:24px 0}.link{color:#ef8ba5;text-decoration:none}
+    @media(max-width:900px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-two{grid-template-columns:1fr}}
+    @media(max-width:650px){.shell{padding:14px}.layout{grid-template-columns:1fr;gap:13px}.side{position:static;display:grid;grid-template-columns:repeat(3,1fr);gap:3px}.side small{grid-column:1/-1}.side button{text-align:center;padding:10px 5px;font-size:11px}.top-right span{display:none}.cards{gap:8px}.card{padding:13px}.card strong{font-size:23px}.heading h1{font-size:28px}.toolbar input{min-width:100%;width:100%}.top{align-items:flex-start}.top-right{flex-direction:column;align-items:flex-end}}
+  </style>
+</head>
+<body>
+  <section class="auth-wrap" id="authView">
+    <div class="auth-card">
+      <div class="brand"><span class="mark">P</span><span>PIXORA <span style="color:#e45a7d">ADMIN</span></span></div>
+      <h1>Control center.</h1>
+      <p>Sign in with your authorized PIXORA administrator account. Admin access is verified against the database role, not the email address entered here.</p>
+      <form id="loginForm">
+        <label for="email">Administrator email</label>
+        <input id="email" type="email" autocomplete="username" required>
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+        <button class="primary" id="loginButton">Sign in securely</button>
+      </form>
+      <div id="authMessage" aria-live="polite"></div>
+      <p><a class="link" href="./">← Return to PIXORA</a></p>
+    </div>
+  </section>
+
+  <div id="adminView" class="hidden">
+    <div class="shell">
+      <header class="top">
+        <div class="brand"><span class="mark">P</span><span>PIXORA <span style="color:#e45a7d">CONTROL</span></span></div>
+        <div class="top-right"><span id="adminIdentity">Administrator</span><button id="refreshButton">↻ Refresh</button><button id="logoutButton">Sign out</button></div>
+      </header>
+      <div class="layout">
+        <nav class="side" aria-label="Admin sections">
+          <small>CONTROL CENTER</small>
+          <button class="active" data-section="overview">▦ &nbsp; Overview</button>
+          <button data-section="content">▣ &nbsp; Content</button>
+          <button data-section="reports">⚑ &nbsp; Reports <span id="reportBadge"></span></button>
+          <button data-section="users">♙ &nbsp; Users</button>
+          <button data-section="actions">◷ &nbsp; Moderation log</button>
+          <small>PLATFORM</small>
+          <button data-section="security">◇ &nbsp; Security status</button>
+        </nav>
+
+        <main>
+          <section class="admin-section" id="section-overview">
+            <div class="heading"><div class="eyebrow">PIXORA CONTROL ROOM</div><h1>Platform overview.</h1><p>Live figures read from your CURRENT PIXORA Supabase project.</p></div>
+            <div id="pageMessage"></div>
+            <div class="cards">
+              <div class="card"><small>Registered profiles</small><strong id="statUsers">—</strong><span>Database profile records</span></div>
+              <div class="card"><small>Total posts</small><strong id="statPosts">—</strong><span>All post statuses</span></div>
+              <div class="card"><small>Published posts</small><strong id="statPublished">—</strong><span>Currently published</span></div>
+              <div class="card"><small>Open reports</small><strong id="statReports">—</strong><span>Awaiting review</span></div>
+            </div>
+            <div class="grid-two">
+              <div class="panel"><h2>Recent posts</h2><p class="sub">Latest content submitted to PIXORA.</p><div id="recentPosts"></div></div>
+              <div class="panel"><h2>Platform connection</h2><p class="sub">Connection checks from this dashboard.</p>
+                <div class="health"><span>Supabase client</span><b class="ok">Connected</b></div>
+                <div class="health"><span>Administrator role</span><b class="ok">Verified</b></div>
+                <div class="health"><span>Row Level Security</span><b class="ok">Enforced</b></div>
+                <div class="health"><span>Media processing</span><b class="warn">Not yet automated</b></div>
+                <div class="health"><span>Admin actions</span><b class="ok">Audit logging enabled</b></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="admin-section hidden" id="section-content">
+            <div class="heading"><div class="eyebrow">CONTENT MODERATION</div><h1>Posts and media.</h1><p>Review published posts, drafts and removed content.</p></div>
+            <div class="panel"><div class="toolbar"><h2>Content library</h2><input id="contentSearch" type="search" placeholder="Search captions or creator IDs"></div><div id="contentTable"></div></div>
+          </section>
+
+          <section class="admin-section hidden" id="section-reports">
+            <div class="heading"><div class="eyebrow">TRUST & SAFETY</div><h1>Reported content.</h1><p>Review reports submitted by PIXORA members.</p></div>
+            <div class="panel"><div class="toolbar"><h2>Reports queue</h2><input id="reportSearch" type="search" placeholder="Search reason or report ID"></div><div id="reportsTable"></div></div>
+          </section>
+
+          <section class="admin-section hidden" id="section-users">
+            <div class="heading"><div class="eyebrow">COMMUNITY</div><h1>Member directory.</h1><p>Read-only account directory. Account bans and role changes are not enabled in this first dashboard release.</p></div>
+            <div class="panel"><div class="toolbar"><h2>Registered profiles</h2><input id="userSearch" type="search" placeholder="Search username or display name"></div><div id="usersTable"></div></div>
+          </section>
+
+          <section class="admin-section hidden" id="section-actions">
+            <div class="heading"><div class="eyebrow">ACCOUNTABILITY</div><h1>Moderation history.</h1><p>Recent actions recorded by moderators and administrators.</p></div>
+            <div class="panel"><div id="actionsTable"></div></div>
+          </section>
+
+          <section class="admin-section hidden" id="section-security">
+            <div class="heading"><div class="eyebrow">SECURITY</div><h1>Security status.</h1><p>Current dashboard access and database protection notes.</p></div>
+            <div class="panel">
+              <div class="health"><span>Current signed-in identity</span><b id="securityIdentity">—</b></div>
+              <div class="health"><span>Database role</span><b class="ok">admin</b></div>
+              <div class="health"><span>Admin role source</span><b>public.user_roles</b></div>
+              <div class="health"><span>Service-role key in browser</span><b class="ok">Not used</b></div>
+              <div class="health"><span>RLS bypass</span><b class="ok">Not used</b></div>
+              <p class="sub" style="margin-top:15px">The dashboard uses the Supabase publishable key and the signed-in user's session. Authorization is enforced by database RLS policies. Do not put a service-role key in frontend code.</p>
+            </div>
+          </section>
+        </main>
+      </div>
+      <div class="foot">© 2026 PIXORA · ADMIN CONTROL CENTER</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="backend.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
