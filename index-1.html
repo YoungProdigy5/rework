@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b080a">
+  <meta name="description" content="PIXORA — discover visuals, collect inspiration and connect with creators.">
+  <title>PIXORA — Discover Beyond Imagination</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23c43d61'/%3E%3Ctext x='32' y='45' font-family='Arial' font-weight='800' font-size='38' text-anchor='middle' fill='white'%3EP%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <noscript>PIXORA needs JavaScript to run. Please turn it on and reload the page.</noscript>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" data-page="home" aria-label="PIXORA home"><span class="brand-mark">P</span><span>PIXORA</span></a>
+      <div class="side-label">DISCOVER</div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <button class="nav-item active" data-page="home"><span class="nav-icon">⌂</span> Home</button>
+        <button class="nav-item" data-page="discover"><span class="nav-icon">⌕</span> Discover</button>
+        <button class="nav-item" data-page="collections"><span class="nav-icon">▤</span> Collections</button>
+        <button class="nav-item" data-page="messages"><span class="nav-icon">▱</span> Messages</button>
+      </nav>
+      <div class="side-label side-label-spaced">YOUR SPACE</div>
+      <nav class="main-nav" aria-label="Your space">
+        <button class="nav-item" data-page="profile"><span class="nav-icon">◉</span> My profile</button>
+        <button class="nav-item" data-page="notifications"><span class="nav-icon">♧</span> Notifications</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="upgrade-card"><div class="upgrade-glow"></div><span class="eyebrow">YOUR WORLD, YOUR WAY</span><strong>Make space for inspiration.</strong><p>Save the visuals that move you.</p><button class="text-button" data-page="collections">Explore collections ↗</button></div>
+        <button class="user-mini" data-page="profile"><span class="avatar avatar-you">G</span><span><b>Guest</b><small>Sign in to get started</small></span><span class="more">···</span></button>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button class="mobile-brand" data-page="home"><span class="brand-mark">P</span> PIXORA</button>
+        <button class="mobile-menu icon-button" id="menuToggle" aria-label="Open menu">☰</button>
+        <label class="search-box"><span>⌕</span><input id="globalSearch" type="search" placeholder="Search inspiration, creators, tags..." autocomplete="off"><kbd>⌘ K</kbd></label>
+        <div class="top-actions"><button class="icon-button atmosphere-trigger" id="atmosphereBtn" title="PIXORA Atmosphere">✧</button><button class="icon-button" data-page="notifications" title="Notifications">♧<i class="tiny-dot" style="display:none"></i></button><button class="top-avatar" data-page="profile" aria-label="My profile">G</button></div>
+      </header>
+
+      <section class="page active" id="page-home">
+        <div class="welcome-row"><div><div class="eyebrow"><span class="live-dot"></span> YOUR DAILY DOSE OF INSPIRATION</div><h1>Discover beyond<br><span>imagination.</span></h1><p class="subheading">A world of visuals worth getting lost in.</p></div><div class="date-chip">✦ &nbsp; YOUR CREATIVE SPACE</div></div>
+        <div class="hero-card">
+          <img src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1800&q=85" alt="Dreamlike night sky over a mountain landscape">
+          <div class="hero-shade"></div><div class="hero-content"><span class="pill pill-light">✦ THE PIXORA EDIT</span><h2>Find your next<br> obsession.</h2><p>Explore a universe of visual inspiration, curated for curious minds.</p><button class="primary-button" data-page="discover">Explore the universe <span>↗</span></button></div>
+        </div>
+        <div class="section-heading"><div><div class="eyebrow">A WORLD OF POSSIBILITIES</div><h2>Explore your interests</h2></div><button class="subtle-link" data-page="discover">All categories <span>↗</span></button></div>
+        <div class="category-row" id="categoryRow">
+          <button class="category-chip selected" data-category="All"><span>✦</span> For you</button>
+        </div>
+        <div class="section-heading feed-heading"><div><div class="eyebrow">HANDPICKED FOR YOU</div><h2>Trending inspiration <span class="heading-spark">✦</span></h2></div><div class="feed-tabs"><button class="feed-tab active" data-feed="For you">For you</button><button class="feed-tab" data-feed="Following">Following</button><button class="feed-tab" data-feed="Popular">Popular</button></div></div>
+        <div class="masonry-grid" id="homeGrid"></div>
+        <div class="load-row" hidden><button class="outline-button" id="loadMore">Discover more <span>↓</span></button></div>
+      </section>
+
+      <section class="page" id="page-discover">
+        <div class="page-heading"><div class="eyebrow">THE WORLD IS YOUR CANVAS</div><h1>Explore <span>everything.</span></h1><p class="subheading">Follow a curiosity. Find something unexpected.</p></div>
+        <div class="discover-tools"><div class="filter-pills"><button class="filter-pill active" data-filter="All">All</button></div><select id="sortSelect" aria-label="Sort content"><option>Recommended</option><option>Most liked</option><option>Newest</option></select></div>
+        <div class="masonry-grid" id="discoverGrid"></div>
+      </section>
+
+      <section class="page" id="page-collections">
+        <div class="page-heading"><div class="eyebrow">KEEP WHAT INSPIRES YOU</div><h1>Your <span>collections.</span></h1><p class="subheading">A personal library of ideas worth coming back to.</p></div>
+        <div class="collection-grid"></div>
+      </section>
+
+      <section class="page" id="page-messages">
+        <div class="page-heading compact-heading"><div class="eyebrow">YOUR CONNECTIONS</div><h1>Messages<span>.</span></h1><p class="subheading">Good ideas are even better when shared.</p></div>
+        <div class="messages-layout"><div class="conversation-panel"><div class="conversation-head"><b>Inbox</b><button class="icon-button" id="newMessage" title="New message" aria-label="New message">＋</button></div><label class="inbox-search">⌕ <input id="conversationSearch" placeholder="Search conversations"></label><div id="conversationList"></div></div><div class="chat-panel" id="chatPanel"></div></div>
+      </section>
+
+      <section class="page" id="page-profile">
+        <div class="profile-cover"><div class="cover-orb"></div></div><div class="profile-main"><div class="profile-avatar">G</div><div class="profile-actions"><button class="outline-button" id="editProfile">Edit profile</button></div><h1>Guest</h1><p class="profile-handle">Sign in to access your profile</p><p class="profile-bio"></p><div class="profile-stats"><span><b>—</b> <small>Following</small></span><span><b>—</b> <small>Followers</small></span><span><b id="savedCount">0</b> <small>Saved</small></span></div><div class="profile-tabs"><button class="active">Saved inspiration</button><button>Created</button><button>About</button></div><div class="masonry-grid" id="savedGrid"></div></div>
+      </section>
+
+      <section class="page" id="page-notifications">
+        <div class="page-heading"><div class="eyebrow">STAY IN THE LOOP</div><h1>Activity<span>.</span></h1><p class="subheading">A little reminder that your world is connected.</p></div>
+        <div class="notification-list"></div>
+      </section>
+
+      <footer class="footer"><span>© 2026 PIXORA</span><span>DISCOVER · COLLECT · CONNECT</span><span></span></footer>
+    </main>
+  </div>
+
+  <nav class="mobile-bottom-nav"><button class="active" data-page="home">⌂<small>Home</small></button><button data-page="discover">⌕<small>Discover</small></button><button data-page="collections">▤<small>Saved</small></button><button data-page="messages">▱<small>Inbox</small></button><button data-page="profile">◉<small>Profile</small></button></nav>
+
+  <div class="modal-backdrop" id="previewModal"><div class="preview-modal"><button class="modal-close" data-close="previewModal" aria-label="Close">×</button><div id="previewContent"></div></div></div>
+  <div class="modal-backdrop" id="atmosphereModal"><div class="small-modal"><button class="modal-close" data-close="atmosphereModal" aria-label="Close">×</button><div class="eyebrow">MAKE PIXORA YOURS</div><h2>PIXORA <span>Atmosphere.</span></h2><p>Give your space a mood. Choose how the interface should feel.</p><div class="atmosphere-options"><button class="atmo-option selected" data-atmo="default"><span class="atmo-swatch default-swatch"></span><b>Original</b><small>Deep black &amp; crimson</small></button><button class="atmo-option" data-atmo="rose"><span class="atmo-swatch rose-swatch"></span><b>Rose glow</b><small>Warm pink ambience</small></button><button class="atmo-option" data-atmo="midnight"><span class="atmo-swatch midnight-swatch"></span><b>Midnight</b><small>Subtle dark red</small></button></div><button class="primary-button full-button" id="applyAtmosphere">Apply atmosphere</button></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="backend.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
